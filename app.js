@@ -7,24 +7,38 @@ const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rho
 
 const app = express();
 
+app.set('view engine', 'ejs');
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
+
 let port = process.env.PORT;
 if (port == null || port == "") {
   port = 3000;
 }
 
-const posts = [];
+const mongoose = require('mongoose');
+mongoose.connect('mongodb+srv://admin-francis:red1sDEAD@cluster0.igevylt.mongodb.net/blog?retryWrites=true&w=majority');
 
-app.set('view engine', 'ejs');
+const postSchema = new mongoose.Schema({
+  title: String,
+  content: String,
+  // url: String
+});
 
-app.use(express.urlencoded({
-  extended: true
-}));
-app.use(express.static("public"));
+const Post = mongoose.model('Post', postSchema);
+// console.log(Post.find());
+// const posts = [];
+
+
 
 app.get("/", (req, res) => {
-  res.render("home", {
-    content: homeStartingContent,
-    posts: posts,
+
+  Post.find({}, (err, foundPosts) => {
+    res.render("home", {
+      content: homeStartingContent,
+      posts: foundPosts
+    })
   });
 });
 
@@ -45,25 +59,25 @@ app.get("/compose", (req, res) => {
 });
 
 app.get("/posts/:postName", (req, res) => {
-  const postRequired = req.params.postName.replace(/\s/g, "-").toLowerCase();
-  posts.forEach((post) => {
-    if (postRequired === post.url) {
-      res.render("post", {
-        title: post.title,
-        content: post.content,
-        url: post.url,
-      });
-    };
-  });
+  // const postRequired = req.params.postName.replace(/\s/g, "-").toLowerCase();
+  const postRequired = req.params.postName;
+  Post.findOne({ _id: postRequired }, (err, foundPost) => {
+    res.render("post", {
+      title: foundPost.title,
+      content: foundPost.content,
+      // url: foundPost.url,
+    });
+  })
 });
 
 app.post("/", (req, res) => {
   const post = {
     title: req.body.postTitle,
     content: req.body.postContent,
-    url: req.body.postTitle.replace(/\s/g, "-").toLowerCase(),
+    // url: req.body.postTitle.replace(/\s/g, "-").toLowerCase(),
   };
-  posts.push(post);
+  newPost = new Post(post);
+  newPost.save();
 
   res.redirect("/");
 })
