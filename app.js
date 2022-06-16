@@ -68,9 +68,11 @@ app.post("/", (req, res) => {
     title: req.body.postTitle,
     content: req.body.postContent
   });
-  newPost.save();
-
-  res.redirect("/");
+  newPost.save((err) => {
+    if (!err) {
+      res.redirect("/");
+    }
+  });
 })
 
 app.listen(port, function () {
