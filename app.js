@@ -22,15 +22,10 @@ mongoose.connect('mongodb+srv://admin-francis:red1sDEAD@cluster0.igevylt.mongodb
 
 const postSchema = new mongoose.Schema({
   title: String,
-  content: String,
-  // url: String
+  content: String
 });
 
 const Post = mongoose.model('Post', postSchema);
-// console.log(Post.find());
-// const posts = [];
-
-
 
 app.get("/", (req, res) => {
 
@@ -59,32 +54,24 @@ app.get("/compose", (req, res) => {
 });
 
 app.get("/posts/:postName", (req, res) => {
-  // const postRequired = req.params.postName.replace(/\s/g, "-").toLowerCase();
   const postRequired = req.params.postName;
   Post.findOne({ _id: postRequired }, (err, foundPost) => {
     res.render("post", {
       title: foundPost.title,
-      content: foundPost.content,
-      // url: foundPost.url,
+      content: foundPost.content
     });
   })
 });
 
 app.post("/", (req, res) => {
-  const post = {
+  newPost = new Post({
     title: req.body.postTitle,
-    content: req.body.postContent,
-    // url: req.body.postTitle.replace(/\s/g, "-").toLowerCase(),
-  };
-  newPost = new Post(post);
+    content: req.body.postContent
+  });
   newPost.save();
 
   res.redirect("/");
 })
-
-
-
-
 
 app.listen(port, function () {
   console.log(`Server started on port ${port}`);
